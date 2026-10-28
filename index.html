@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>50-Question Practice Exam</title>
+<style>
+:root{--blue:#1457a6;--pale:#eef5ff;--ink:#172033;--green:#18794e;--red:#b42318}
+*{box-sizing:border-box}body{margin:0;background:#f3f6fb;color:var(--ink);font:16px/1.5 Arial,sans-serif}
+header{background:linear-gradient(120deg,#1457a6,#5836a8);color:white;padding:25px 16px;text-align:center}
+header h1{margin:0 0 8px;font-size:clamp(24px,5vw,34px)}header p{margin:4px}
+main{max-width:850px;margin:18px auto;padding:0 12px}
+.card{background:white;border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 3px 14px #15294b12}
+.notice{background:var(--pale);border-left:4px solid var(--blue);padding:12px;border-radius:8px}
+.progress-wrap{height:9px;background:#e5eaf2;border-radius:20px;overflow:hidden;margin:12px 0}
+#progress{height:100%;width:0;background:#2677d8;transition:width .2s}
+.qtitle{font-weight:700;margin:0 0 10px}.topic{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:#5b6475;font-weight:bold}
+.option{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid #dbe2ec;border-radius:9px;margin:8px 0;cursor:pointer}
+.option:has(input:checked){background:#eef5ff;border-color:#2677d8}
+.option input{margin-top:5px;accent-color:#1457a6}
+button{border:0;border-radius:9px;padding:12px 18px;font-weight:bold;font-size:16px;cursor:pointer}
+.primary{background:var(--blue);color:white}.secondary{background:#e9eef6;color:#1c2c44}
+button:disabled{opacity:.45;cursor:not-allowed}.actions{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;margin:16px 0}
+#result{display:none}.score{font-size:34px;font-weight:800;color:var(--blue)}.review-item{border-top:1px solid #e4e8ef;padding:12px 0}.correct{color:var(--green);font-weight:bold}.wrong{color:var(--red);font-weight:bold}
+footer{text-align:center;color:#667085;font-size:13px;padding:20px}
+@media(max-width:520px){.card{padding:14px}.actions button{flex:1}}
+</style>
+</head>
+<body>
+<header><h1>50-Question Practice Exam</h1><p>Filipino • English Grammar & Vocabulary • Math • Reasoning • Philippine History • Science</p><p>Self-practice quiz — answer all questions, then submit.</p></header>
+<main>
+<section class="card" id="intro">
+<h2>Instructions / Panuto</h2>
+<div class="notice">Choose one answer for each question. You can move between questions. Your score appears after you press <b>Submit Exam</b>. Press <b>Retake Exam</b> to start again. This practice exam works offline after the file has been downloaded.</div>
+<p><b>50 questions · 1 point each · No account needed</b></p>
+<button class="primary" id="startBtn">Start Exam / Simulan</button>
+</section>
+<section id="exam" style="display:none">
+<div class="card"><div id="counter">Question 1 of 50</div><div class="progress-wrap"><div id="progress"></div></div><div id="questionArea"></div>
+<div class="actions"><button class="secondary" id="prevBtn">← Previous</button><button class="primary" id="nextBtn">Next →</button><button class="primary" id="submitBtn" style="display:none">Submit Exam</button></div></div>
+</section>
+<section class="card" id="result"><h2>Exam Result / Resulta</h2><div class="score" id="scoreText"></div><p id="feedback"></p><button class="primary" id="retakeBtn">Retake Exam</button><button class="secondary" id="reviewBtn">Show Answer Review</button><div id="review" style="display:none"></div></section>
+</main><footer>Practice tool • You may retake the exam as many times as you like.</footer>
+<script>
+const questions = [
+{t:"Filipino",q:"Ano ang kasingkahulugan ng salitang “masaya”?",o:["Malungkot","Maligaya","Galit","Pagod"],a:1,e:"Ang “maligaya” ay kasingkahulugan ng “masaya.”"},
+{t:"Filipino",q:"Alin ang pangngalan sa pangungusap: “Mabilis tumakbo ang bata.”?",o:["Mabilis","Tumakbo","Ang","Bata"],a:3,e:"Ang “bata” ay pangngalan; ito ang pangalan ng tao."},
+{t:"Filipino",q:"Ano ang kasalungat ng “mataas”?",o:["Mahaba","Mababa","Malawak","Malaki"],a:1,e:"Ang kasalungat ng “mataas” ay “mababa.”"},
+{t:"Filipino",q:"Alin ang wastong baybay?",o:["Pangarap","Pangarrap","Pangharap","Pangarappp"],a:0,e:"Ang wastong baybay ay pangarap."},
+{t:"Filipino",q:"Sa pangungusap na “Si Ana ay nag-aaral,” ano ang pandiwa?",o:["Si","Ana","Ay","Nag-aaral"],a:3,e:"Ang pandiwa ay salitang nagsasaad ng kilos."},
+{t:"Filipino",q:"Ano ang ibig sabihin ng “matipid”?",o:["Mahilig gumastos","Maingat sa paggamit ng pera o bagay","Laging nahuhuli","Madaling magalit"],a:1,e:"Ang matipid ay maingat sa paggastos at paggamit ng mga bagay."},
+{t:"Filipino",q:"Alin ang pang-uri?",o:["Mesa","Maganda","Tumakbo","Sila"],a:1,e:"Ang “maganda” ay naglalarawan sa pangngalan."},
+{t:"Filipino",q:"Piliin ang wastong pangungusap.",o:["Kumain ako ng mangga.","Kumain ako nang mangga.","Kumain ako nang ang mangga.","Kumain mangga ako ng."],a:0,e:"“Kumain ako ng mangga” ang wastong ayos."},
+{t:"English Grammar & Vocabulary",q:"Choose the correct sentence.",o:["She go to school every day.","She goes to school every day.","She going to school every day.","She gone to school every day."],a:1,e:"With he/she/it in the simple present, use “goes.”"},
+{t:"English Grammar & Vocabulary",q:"What is the synonym of “rapid”?",o:["Slow","Fast","Quiet","Weak"],a:1,e:"Rapid means fast or quick."},
+{t:"English Grammar & Vocabulary",q:"Choose the correct word: “They ___ playing outside.”",o:["is","am","are","be"],a:2,e:"Use “are” with the subject “they.”"},
+{t:"English Grammar & Vocabulary",q:"What is the opposite of “ancient”?",o:["Old","Historic","Modern","Past"],a:2,e:"Modern is the opposite of ancient."},
+{t:"English Grammar & Vocabulary",q:"Choose the correct article: “She ate ___ apple.”",o:["a","an","thee","no article ever"],a:1,e:"Use “an” before a vowel sound, as in apple."},
+{t:"English Grammar & Vocabulary",q:"Which word is spelled correctly?",o:["Neccessary","Necesary","Necessary","Neccesary"],a:2,e:"The correct spelling is necessary."},
+{t:"English Grammar & Vocabulary",q:"Choose the correct past tense: “Yesterday, we ___ a movie.”",o:["watch","watched","watching","watches"],a:1,e:"“Yesterday” indicates the past; watched is correct."},
+{t:"English Grammar & Vocabulary",q:"What does “generous” mean?",o:["Willing to give or share","Always late","Afraid of everything","Very noisy"],a:0,e:"A generous person is willing to give or share."},
+{t:"English Grammar & Vocabulary",q:"Choose the correct pronoun: “Maria and ___ are classmates.”",o:["me","I","my","mine"],a:1,e:"“Maria and I” is the subject of the sentence."},
+{t:"English Grammar & Vocabulary",q:"Which sentence is punctuated correctly?",o:["Where are you going.","Where are you going?","Where are you going,","Where are you going!?"],a:1,e:"A direct question normally ends with a question mark."},
+{t:"Math",q:"What is 25% of 200?",o:["25","40","50","75"],a:2,e:"25% = 0.25; 0.25 × 200 = 50."},
+{t:"Math",q:"Calculate: 3/4 + 1/4.",o:["1/2","1","4/8","3/8"],a:1,e:"3/4 + 1/4 = 4/4 = 1."},
+{t:"Math",q:"A notebook costs ₱18. How much do 4 notebooks cost?",o:["₱62","₱68","₱72","₱82"],a:2,e:"18 × 4 = 72 pesos."},
+{t:"Math",q:"Solve: 7 × (8 − 3).",o:["25","35","40","56"],a:1,e:"First 8 − 3 = 5, then 7 × 5 = 35."},
+{t:"Math",q:"What is the average of 4, 6, 8, and 10?",o:["6","7","8","9"],a:1,e:"(4 + 6 + 8 + 10) ÷ 4 = 28 ÷ 4 = 7."},
+{t:"Math",q:"A shirt marked ₱500 has a 10% discount. What is the sale price?",o:["₱400","₱450","₱490","₱550"],a:1,e:"10% of 500 is 50; 500 − 50 = 450."},
+{t:"Math",q:"Solve for x: x + 13 = 29.",o:["14","16","18","42"],a:1,e:"Subtract 13 from both sides: x = 16."},
+{t:"Math",q:"A rectangle is 9 cm long and 4 cm wide. What is its area?",o:["13 cm²","26 cm²","36 cm²","72 cm²"],a:2,e:"Area = length × width = 9 × 4 = 36 cm²."},
+{t:"Math",q:"What is 2.5 + 0.75?",o:["2.575","3.00","3.25","3.75"],a:2,e:"2.50 + 0.75 = 3.25."},
+{t:"Reasoning",q:"Find the next number: 2, 4, 8, 16, __.",o:["18","24","30","32"],a:3,e:"Each number doubles; 16 × 2 = 32."},
+{t:"Reasoning",q:"Which one does not belong?",o:["Rose","Tulip","Mango","Sampaguita"],a:2,e:"Mango is a fruit; the others are flowers."},
+{t:"Reasoning",q:"All cats are animals. Mimi is a cat. Therefore…",o:["Mimi is a plant.","Mimi is an animal.","All animals are cats.","Mimi is a bird."],a:1,e:"If all cats are animals and Mimi is a cat, Mimi is an animal."},
+{t:"Reasoning",q:"If today is Tuesday, what day will it be 10 days from today?",o:["Thursday","Friday","Saturday","Sunday"],a:1,e:"Seven days later is Tuesday; three more days is Friday."},
+{t:"Reasoning",q:"Book is to reading as fork is to…",o:["Writing","Eating","Sleeping","Running"],a:1,e:"A book is used for reading; a fork is used for eating."},
+{t:"Reasoning",q:"Complete the pattern: A, C, E, G, __.",o:["H","I","J","K"],a:1,e:"The pattern skips one letter each time: A, C, E, G, I."},
+{t:"Reasoning",q:"Liza is taller than Ben. Ben is taller than Carlo. Who is shortest?",o:["Liza","Ben","Carlo","Cannot tell"],a:2,e:"The order is Liza > Ben > Carlo, so Carlo is shortest."},
+{t:"Reasoning",q:"If 5 pens cost ₱60, how much do 2 pens cost at the same rate?",o:["₱12","₱20","₱24","₱30"],a:2,e:"Each pen costs 60 ÷ 5 = ₱12; two cost ₱24."},
+{t:"Philippine 21st-Century History",q:"Who became president of the Philippines in 2001 after Joseph Estrada left office?",o:["Gloria Macapagal Arroyo","Benigno Aquino III","Rodrigo Duterte","Fidel V. Ramos"],a:0,e:"Gloria Macapagal Arroyo became president in January 2001."},
+{t:"Philippine 21st-Century History",q:"Who was elected president of the Philippines in 2010?",o:["Joseph Estrada","Benigno “Noynoy” Aquino III","Ferdinand Marcos Jr.","Rodrigo Duterte"],a:1,e:"Benigno Aquino III won the 2010 presidential election."},
+{t:"Philippine 21st-Century History",q:"Who became president of the Philippines in 2016?",o:["Gloria Macapagal Arroyo","Benigno Aquino III","Rodrigo Duterte","Ferdinand Marcos Jr."],a:2,e:"Rodrigo Duterte took office in 2016."},
+{t:"Philippine 21st-Century History",q:"Which major natural disaster struck the Philippines in November 2013?",o:["Typhoon Yolanda (Haiyan)","Mount Pinatubo eruption","Bohol earthquake of 1990","Typhoon Ondoy in 2009"],a:0,e:"Super Typhoon Yolanda, internationally known as Haiyan, struck in November 2013."},
+{t:"Philippine 21st-Century History",q:"In 2018, what agreement was enacted into law to expand the Bangsamoro region's autonomy?",o:["The Jones Law","The Bangsamoro Organic Law","The Treaty of Paris","The Tydings–McDuffie Act"],a:1,e:"The Bangsamoro Organic Law was enacted in 2018."},
+{t:"Philippine 21st-Century History",q:"Who became president of the Philippines in 2022?",o:["Rodrigo Duterte","Ferdinand Marcos Jr.","Benigno Aquino III","Manuel Roxas"],a:1,e:"Ferdinand Marcos Jr. assumed office in June 2022."},
+{t:"Philippine 21st-Century History",q:"Which Philippine city hosted the 2019 Southeast Asian Games opening ceremony?",o:["Cebu City","Davao City","Bocaue, Bulacan","Baguio City"],a:2,e:"The opening ceremony was held at the Philippine Arena in Bocaue, Bulacan."},
+{t:"Philippine 21st-Century History",q:"The Philippines commemorates the EDSA People Power Revolution on which date?",o:["February 25","June 12","August 21","November 30"],a:0,e:"The EDSA People Power Revolution anniversary is February 25; the event occurred in 1986."},
+{t:"Basic Science",q:"Which organ pumps blood around the human body?",o:["Lungs","Brain","Heart","Kidneys"],a:2,e:"The heart pumps blood through the circulatory system."},
+{t:"Basic Science",q:"What gas do plants mainly absorb for photosynthesis?",o:["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],a:1,e:"Plants use carbon dioxide, water, and light to make sugars during photosynthesis."},
+{t:"Basic Science",q:"At standard atmospheric pressure, water boils at what temperature?",o:["0°C","50°C","100°C","150°C"],a:2,e:"Water boils at 100°C at standard atmospheric pressure."},
+{t:"Basic Science",q:"Which planet is known as the Red Planet?",o:["Venus","Mars","Jupiter","Mercury"],a:1,e:"Iron-rich dust gives Mars its reddish appearance."},
+{t:"Basic Science",q:"What is the basic unit of life?",o:["Atom","Organ","Cell","Tissue"],a:2,e:"The cell is the basic structural and functional unit of life."},
+{t:"Basic Science",q:"Which force pulls objects toward Earth?",o:["Friction","Magnetism","Gravity","Electricity"],a:2,e:"Gravity attracts objects with mass toward Earth."},
+{t:"Basic Science",q:"Which vitamin can the body produce when skin is exposed to sunlight?",o:["Vitamin A","Vitamin B12","Vitamin C","Vitamin D"],a:3,e:"Sunlight enables the skin to produce vitamin D."},
+{t:"Basic Science",q:"Which of these is a renewable energy source?",o:["Coal","Oil","Solar energy","Natural gas"],a:2,e:"Solar energy is renewable because sunlight is continually replenished."}
+];
+let current=0, answers=Array(questions.length).fill(null);
+const area=document.getElementById('questionArea');
+function render(){
+ const q=questions[current]; document.getElementById('counter').textContent=`Question ${current+1} of ${questions.length}`;
+ document.getElementById('progress').style.width=((current+1)/questions.length*100)+'%';
+ area.innerHTML=`<div class="topic">${q.t}</div><p class="qtitle">${current+1}. ${q.q}</p>`+q.o.map((op,i)=>`<label class="option"><input type="radio" name="answer" value="${i}" ${answers[current]===i?'checked':''}><span>${String.fromCharCode(65+i)}. ${op}</span></label>`).join('');
+ area.querySelectorAll('input').forEach(el=>el.addEventListener('change',e=>answers[current]=Number(e.target.value)));
+ document.getElementById('prevBtn').disabled=current===0;
+ document.getElementById('nextBtn').style.display=current===questions.length-1?'none':'inline-block';
+ document.getElementById('submitBtn').style.display=current===questions.length-1?'inline-block':'none';
+}
+document.getElementById('startBtn').onclick=()=>{document.getElementById('intro').style.display='none';document.getElementById('exam').style.display='block';render();window.scrollTo(0,0)};
+document.getElementById('prevBtn').onclick=()=>{if(current>0){current--;render();window.scrollTo(0,0)}};
+document.getElementById('nextBtn').onclick=()=>{if(current<questions.length-1){current++;render();window.scrollTo(0,0)}};
+document.getElementById('submitBtn').onclick=()=>{
+ const unanswered=answers.filter(x=>x===null).length;
+ if(unanswered && !confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`))return;
+ let score=0;questions.forEach((q,i)=>{if(answers[i]===q.a)score++});
+ document.getElementById('exam').style.display='none';const r=document.getElementById('result');r.style.display='block';
+ document.getElementById('scoreText').textContent=`${score} / ${questions.length} (${Math.round(score/questions.length*100)}%)`;
+ document.getElementById('feedback').textContent=score>=45?'Excellent work!':score>=35?'Good job! Review the questions you missed.':score>=25?'Nice effort. Keep practicing and try again.':'Keep learning—you can retake the exam and improve your score.';
+ const rev=document.getElementById('review');rev.style.display='none';rev.innerHTML='<h3>Answer Review</h3>'+questions.map((q,i)=>`<div class="review-item"><b>${i+1}. ${q.q}</b><p>Your answer: <span class="${answers[i]===q.a?'correct':'wrong'}">${answers[i]===null?'Not answered':String.fromCharCode(65+answers[i])+'. '+q.o[answers[i]]}</span></p><p class="correct">Correct answer: ${String.fromCharCode(65+q.a)}. ${q.o[q.a]}</p><p>${q.e}</p></div>`).join('');
+ window.scrollTo(0,0);
+};
+document.getElementById('reviewBtn').onclick=()=>{const r=document.getElementById('review');r.style.display=r.style.display==='none'?'block':'none';document.getElementById('reviewBtn').textContent=r.style.display==='none'?'Show Answer Review':'Hide Answer Review'};
+document.getElementById('retakeBtn').onclick=()=>{current=0;answers=Array(questions.length).fill(null);document.getElementById('result').style.display='none';document.getElementById('intro').style.display='block';document.getElementById('review').style.display='none';window.scrollTo(0,0)};
+</script></body></html>
