@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>50-Question Knowledge Challenge</title>
+<style>
+:root{--blue:#174ea6;--light:#eef4ff;--green:#137333;--red:#b3261e;--ink:#202124}
+*{box-sizing:border-box}body{margin:0;background:#f3f6fb;color:var(--ink);font-family:Arial,Helvetica,sans-serif;line-height:1.5}
+.wrap{max-width:850px;margin:0 auto;padding:18px}.card{background:white;border-radius:16px;padding:22px;margin:14px 0;box-shadow:0 3px 14px #0000000d}
+h1{font-size:clamp(24px,5vw,34px);margin:0 0 8px;color:var(--blue)}h2{font-size:22px;margin-top:0}
+.sub{color:#5f6368}.field{width:100%;font-size:17px;padding:13px;border:1px solid #aeb7c4;border-radius:9px;margin:8px 0 14px}
+button{border:0;border-radius:9px;padding:12px 18px;font-size:16px;font-weight:700;cursor:pointer}
+.primary{background:var(--blue);color:white}.secondary{background:#e8eef8;color:#17365f}.hidden{display:none}
+.progress{height:9px;background:#e3e8f0;border-radius:99px;overflow:hidden;margin:14px 0}.bar{height:100%;width:0;background:var(--blue);transition:width .2s}
+.question{border:1px solid #dce2eb;border-radius:12px;padding:16px;margin:16px 0}.qtitle{font-weight:700;margin:0 0 10px}
+.option{display:flex;gap:10px;align-items:flex-start;padding:10px;border-radius:8px;cursor:pointer}.option:hover{background:#f3f6fb}.option input{margin-top:5px;accent-color:var(--blue)}
+.tag{display:inline-block;background:var(--light);color:var(--blue);font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;margin-bottom:8px}
+.feedback{margin-top:10px;padding:10px;border-radius:8px;background:#f5f7fa}.correct{color:var(--green);font-weight:700}.incorrect{color:var(--red);font-weight:700}
+.score{font-size:38px;color:var(--blue);font-weight:800}.resultrow{padding:12px 0;border-bottom:1px solid #e5e8ed}.small{font-size:14px;color:#5f6368}
+@media(max-width:520px){.wrap{padding:10px}.card{padding:16px}button{width:100%;margin:4px 0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="welcome" class="card">
+    <h1>50-Question Knowledge Challenge</h1>
+    <p>Test your knowledge in Tagalog, Philippine history, basic science, mathematics & reasoning, and English.</p>
+    <p class="sub">Choose one answer for each question. Submit to see your score, explanations, subject breakdown, and tips.</p>
+    <label for="studentName"><strong>Your name</strong></label>
+    <input class="field" id="studentName" maxlength="60" placeholder="Enter your name">
+    <button class="primary" id="startBtn">Start exam</button>
+  </section>
+  <section id="exam" class="hidden">
+    <div class="card">
+      <strong id="greeting"></strong>
+      <div class="progress"><div id="bar" class="bar"></div></div>
+      <div class="small" id="progressText">0 of 50 answered</div>
+    </div>
+    <div id="questions"></div>
+    <div class="card">
+      <p id="unansweredNote">You can review your answers before submitting.</p>
+      <button class="primary" id="submitBtn">Submit exam</button>
+    </div>
+  </section>
+  <section id="results" class="hidden">
+    <div class="card">
+      <h1>Exam results</h1>
+      <p id="resultName"></p>
+      <div class="score" id="score"></div>
+      <p id="scoreMessage"></p>
+      <button class="primary" id="reviewBtn">Review answers & explanations</button>
+      <button class="secondary" id="retakeBtn">Start a new attempt</button>
+    </div>
+    <div class="card"><h2>Subject breakdown</h2><div id="breakdown"></div></div>
+    <div class="card"><h2>What to improve</h2><div id="tips"></div></div>
+    <div id="review"></div>
+  </section>
+</div>
+<script>
+const questions = [
+{c:"Tagalog",q:"Ano ang pinakamalapit na kahulugan ng salitang “masinop”?",o:["Magastos","Maingat at matipid","Maingay","Mabilis"],a:1,e:"Ang masinop ay maingat sa paggamit ng oras, pera, o mga bagay."},
+{c:"Tagalog",q:"Alin ang wastong pangungusap?",o:["Sila ay pumunta kahapon sa paaralan.","Sila pumunta ay kahapon paaralan.","Kahapon sila paaralan pumunta ay.","Pumunta sila ay sa kahapon paaralan."],a:0,e:"Ang “Sila ay pumunta kahapon sa paaralan” ay may wastong ayos ng pangungusap."},
+{c:"Tagalog",q:"Ano ang kasalungat ng “marubdob” sa pangungusap na “marubdob ang kaniyang damdamin”?",o:["Matindi","Masidhi","Mahina","Tapat"],a:2,e:"Ang marubdob ay matindi o masidhi; ang kasalungat nito rito ay mahina."},
+{c:"Tagalog",q:"Ano ang ibig sabihin ng sawikaing “balat-sibuyas”?",o:["Mahilig magluto","Madaling masaktan ang damdamin","Matapang sa panganib","Mahilig sa halaman"],a:1,e:"Ang balat-sibuyas ay taong madaling magdamdam o masaktan."},
+{c:"Tagalog",q:"Alin ang pang-uri sa “Mabilis na tumakbo ang batang masayahin”?",o:["Tumakbo","Ang","Mabilis at masayahin","Batang"],a:2,e:"Ang mabilis at masayahin ay naglalarawan ng kilos o tao."},
+{c:"Tagalog",q:"Piliin ang wastong gamit ng “ng” at “nang.”",o:["Kumain siya nang tinapay.","Bumili siya ng mangga.","Tumakbo ng mabilis siya.","Nang lapis ang nawala."],a:1,e:"Ginagamit ang “ng” upang markahan ang bagay na binili: ng mangga."},
+{c:"Tagalog",q:"Ano ang pangunahing layunin ng tekstong nagbibigay-impormasyon?",o:["Manghikayat lamang","Magpatawa lamang","Magbigay ng kaalaman o datos","Magtago ng katotohanan"],a:2,e:"Naglalayong magpaliwanag o maglahad ng impormasyon ang tekstong ito."},
+{c:"Tagalog",q:"Ano ang kasingkahulugan ng “saliksik”?",o:["Pananaliksik","Pagtatalo","Pagtulog","Paglalakbay"],a:0,e:"Ang saliksik ay masusing paghahanap o pananaliksik."},
+{c:"Tagalog",q:"Sa pangungusap na “Ipinagluto ni Ana ng hapunan ang kaniyang lola,” sino ang pinaglutuan?",o:["Ana","Ang lola ni Ana","Ang hapunan","Walang tinukoy"],a:1,e:"Ang lola ang tumanggap ng pagluluto o pinaglutuan."},
+{c:"Tagalog",q:"Alin ang halimbawa ng tayutay na pagtutulad?",o:["Ang buhay ay isang gulong.","Sumayaw ang mga dahon.","Kasinggaan ng balahibo ang bag.","Umiyak ang langit."],a:2,e:"Gumagamit ang pagtutulad ng mga salitang gaya ng parang, tulad, o kasing-."},
+{c:"Philippine History",q:"Sino ang kinikilalang pambansang bayani ng Pilipinas?",o:["Andres Bonifacio","Jose Rizal","Apolinario Mabini","Emilio Aguinaldo"],a:1,e:"Si Jose Rizal ay malawak na kinikilalang pambansang bayani."},
+{c:"Philippine History",q:"Anong taon ipinahayag ang kalayaan ng Pilipinas mula sa Espanya sa Kawit, Cavite?",o:["1896","1898","1901","1946"],a:1,e:"Ipinahayag ang kalayaan noong Hunyo 12, 1898."},
+{c:"Philippine History",q:"Sino ang nagtatag ng Katipunan kasama ang mga kasamahan noong 1892?",o:["Andres Bonifacio","Manuel Quezon","Sergio Osmeña","Ramon Magsaysay"],a:0,e:"Si Andres Bonifacio ay pangunahing tagapagtatag ng Katipunan."},
+{c:"Philippine History",q:"Ano ang tawag sa mapayapang people-power movement noong 1986?",o:["Sigaw sa Pugad Lawin","EDSA People Power Revolution","Basi Revolt","Cry of Balintawak"],a:1,e:"Ang EDSA People Power Revolution noong 1986 ay nagpatalsik kay Ferdinand Marcos Sr."},
+{c:"Philippine History",q:"Sino ang unang pangulo ng Unang Republika ng Pilipinas?",o:["Manuel Roxas","Emilio Aguinaldo","Jose P. Laurel","Ferdinand Marcos"],a:1,e:"Si Emilio Aguinaldo ang naging pangulo ng Unang Republika, na pinasinayaan noong 1899."},
+{c:"Philippine History",q:"Aling bansa ang sumakop sa Pilipinas matapos ang pamamahala ng Espanya, kasunod ng Digmaang Espanyol-Amerikano?",o:["Portugal","Japan","United States","France"],a:2,e:"Napasailalim ang Pilipinas sa pamamahala ng Estados Unidos matapos ang digmaan at Treaty of Paris ng 1898."},
+{c:"Philippine History",q:"Anong petsa ipinagdiriwang ang Araw ng Kalayaan ng Pilipinas?",o:["Hunyo 12","Hulyo 4","Agosto 21","Nobyembre 30"],a:0,e:"Hunyo 12 ang opisyal na Araw ng Kalayaan ng Pilipinas."},
+{c:"Philippine History",q:"Sino ang tinaguriang “Brains of the Revolution” at naging tagapayo ni Aguinaldo?",o:["Apolinario Mabini","Juan Luna","Marcelo H. del Pilar","Lapu-Lapu"],a:0,e:"Si Apolinario Mabini ay mahalagang tagapayo at pilosopong pampolitika ng rebolusyon."},
+{c:"Philippine History",q:"Ano ang tawag sa sapilitang paglalakad ng mga bihag na sundalo noong 1942?",o:["Bataan Death March","People Power","La Solidaridad","Galleon Trade"],a:0,e:"Ang Bataan Death March ay naganap matapos sumuko ang mga puwersa sa Bataan noong Ikalawang Digmaang Pandaigdig."},
+{c:"Philippine History",q:"Alin ang pangunahing layunin ng 1987 Constitution?",o:["Alisin ang lahat ng halalan","Itakda ang batayang balangkas ng pamahalaan at mga karapatan","Palitan ang lahat ng lokal na wika","Ipagbawal ang mga sangay ng pamahalaan"],a:1,e:"Itinatakda ng Konstitusyon ang istruktura ng pamahalaan, kapangyarihan nito, at mga karapatan ng mamamayan."},
+{c:"Basic Science",q:"Anong gas ang pangunahing ginagamit ng halaman sa photosynthesis?",o:["Oxygen","Carbon dioxide","Nitrogen","Hydrogen"],a:1,e:"Sumisipsip ang halaman ng carbon dioxide at tubig upang makagawa ng asukal gamit ang liwanag."},
+{c:"Basic Science",q:"Ano ang SI unit ng puwersa?",o:["Joule","Watt","Newton","Pascal"],a:2,e:"Ang puwersa ay sinusukat sa newton (N)."},
+{c:"Basic Science",q:"Aling bahagi ng selula ang karaniwang naglalaman ng genetic material at kumokontrol sa maraming gawain?",o:["Nucleus","Cell wall","Vacuole","Ribosome"],a:0,e:"Ang nucleus ang naglalaman ng karamihan sa DNA ng eukaryotic cell."},
+{c:"Basic Science",q:"Ano ang pH ng neutral na purong tubig sa humigit-kumulang 25°C?",o:["2","5","7","12"],a:2,e:"Ang neutral na tubig ay may pH na humigit-kumulang 7 sa 25°C."},
+{c:"Basic Science",q:"Anong puwersa ang humihila sa mga bagay patungo sa Earth?",o:["Magnetism lamang","Gravity","Friction lamang","Buoyancy"],a:1,e:"Ang gravity ay puwersang atraksyon sa pagitan ng mga bagay na may masa."},
+{c:"Basic Science",q:"Ano ang tawag sa pagbabago mula liquid tungo sa gas sa buong likido kapag sapat ang init?",o:["Freezing","Condensation","Boiling","Deposition"],a:2,e:"Sa boiling, nagiging gas ang likido sa buong likido kapag umabot sa boiling point."},
+{c:"Basic Science",q:"Aling organ ang pangunahing nagbobomba ng dugo sa katawan?",o:["Baga","Atay","Puso","Bato"],a:2,e:"Ang puso ang nagbobomba ng dugo sa circulatory system."},
+{c:"Basic Science",q:"Alin ang renewable energy source?",o:["Coal","Natural gas","Solar energy","Diesel"],a:2,e:"Ang solar energy ay nagmumula sa sikat ng araw at natural na napapalitan."},
+{c:"Basic Science",q:"Bakit mukhang nagiging baluktot ang lapis kapag nakalubog sa tubig?",o:["Reflection lamang","Refraction ng liwanag","Paglikha ng bagong liwanag","Pagkawala ng gravity"],a:1,e:"Nagbabago ang direksiyon ng liwanag sa paglipat sa pagitan ng tubig at hangin; ito ang refraction."},
+{c:"Basic Science",q:"Aling particle ang may negatibong electric charge?",o:["Proton","Neutron","Electron","Nucleus"],a:2,e:"Ang electron ay may negatibong charge; ang proton ay positibo at neutron ay neutral."},
+{c:"Math & Reasoning",q:"Ano ang 15% ng 240?",o:["24","30","36","40"],a:2,e:"0.15 × 240 = 36."},
+{c:"Math & Reasoning",q:"Kung 3x + 5 = 26, ano ang x?",o:["5","6","7","8"],a:2,e:"3x = 21, kaya x = 7."},
+{c:"Math & Reasoning",q:"Ano ang susunod na bilang: 2, 6, 12, 20, 30, ___?",o:["36","40","42","44"],a:2,e:"Ang pagitan ay +4, +6, +8, +10; susunod ay +12, kaya 42."},
+{c:"Math & Reasoning",q:"Ang ratio ng pula sa asul na bola ay 2:3. Kung may 25 bola lahat, ilan ang asul?",o:["10","12","15","18"],a:2,e:"May 5 bahagi lahat; bawat bahagi ay 25 ÷ 5 = 5. Asul: 3 × 5 = 15."},
+{c:"Math & Reasoning",q:"Ano ang mean ng 4, 7, 9, at 12?",o:["7","8","8.5","9"],a:1,e:"(4 + 7 + 9 + 12) ÷ 4 = 32 ÷ 4 = 8."},
+{c:"Math & Reasoning",q:"Isang item na ₱800 ay may 25% discount. Magkano ang sale price?",o:["₱200","₱500","₱600","₱700"],a:2,e:"25% ng ₱800 ay ₱200; ₱800 − ₱200 = ₱600."},
+{c:"Math & Reasoning",q:"Kung lahat ng Zor ay Mip at lahat ng Mip ay Lak, ano ang tiyak na totoo?",o:["Lahat ng Lak ay Zor","Lahat ng Zor ay Lak","Walang Zor na Lak","Walang Mip na Lak"],a:1,e:"Kung Zor ⊆ Mip at Mip ⊆ Lak, kung gayon Zor ⊆ Lak."},
+{c:"Math & Reasoning",q:"Ano ang area ng parihabang may haba na 9 cm at lapad na 4 cm?",o:["13 cm²","26 cm²","36 cm²","72 cm²"],a:2,e:"Area = haba × lapad = 9 × 4 = 36 cm²."},
+{c:"Math & Reasoning",q:"Ang isang sasakyan ay bumibiyahe ng 150 km sa loob ng 3 oras. Ano ang average speed?",o:["30 km/h","45 km/h","50 km/h","60 km/h"],a:2,e:"Average speed = distance ÷ time = 150 ÷ 3 = 50 km/h."},
+{c:"Math & Reasoning",q:"Isang patas na six-sided die ang inihagis. Ano ang probability na makakuha ng even number?",o:["1/6","1/3","1/2","2/3"],a:2,e:"May tatlong even outcomes (2, 4, 6) sa anim: 3/6 = 1/2."},
+{c:"English",q:"Choose the grammatically correct sentence.",o:["She don't like coffee.","She doesn't likes coffee.","She doesn't like coffee.","She not like coffee."],a:2,e:"After “doesn't,” use the base form “like.”"},
+{c:"English",q:"Choose the closest synonym of “concise.”",o:["Brief and clear","Confusing","Very lengthy","Uncertain"],a:0,e:"Concise means expressing something clearly in few words."},
+{c:"English",q:"Fill in the blank: “Neither of the answers ___ correct.”",o:["are","were","is","be"],a:2,e:"“Neither” is treated as singular in standard formal usage here, so “is” is appropriate."},
+{c:"English",q:"Which word is an adverb in “He carefully opened the box”?",o:["He","Carefully","Opened","Box"],a:1,e:"“Carefully” describes how he opened the box."},
+{c:"English",q:"Choose the correct passive form of “The chef prepared the meal.”",o:["The meal prepared the chef.","The meal was prepared by the chef.","The chef was prepared by the meal.","The meal is prepare by the chef."],a:1,e:"Past simple passive uses was/were + past participle: “was prepared.”"},
+{c:"English",q:"What does “reluctant” mean?",o:["Eager","Unwilling or hesitant","Extremely angry","Careless"],a:1,e:"Reluctant means not willing or hesitant to do something."},
+{c:"English",q:"Choose the correct word: “Their team performed ___ than ours.”",o:["good","best","better","more good"],a:2,e:"“Better” is the comparative form of “well.”"},
+{c:"English",q:"Which sentence uses the apostrophe correctly?",o:["The dogs bone was lost.","The dog's bone was lost.","The dogs' bone was lost. (one dog intended)","The dog's' bone was lost."],a:1,e:"For one dog owning a bone, use the singular possessive “dog's.”"},
+{c:"English",q:"Choose the correct conjunction: “I studied hard, ___ I passed the exam.”",o:["because","so","although","unless"],a:1,e:"“So” shows the result: studying hard led to passing."},
+{c:"English",q:"Which sentence is punctuated correctly?",o:["After lunch we, went home.","After lunch, we went home.","After, lunch we went home.","After lunch we went, home."],a:1,e:"An introductory phrase is commonly followed by a comma."}
+];
+let name = "";
+let submitted = false;
+const letters = ["A","B","C","D"];
+const $ = id => document.getElementById(id);
+function renderQuestions(){
+  $("questions").innerHTML = questions.map((q,i)=>`<article class="question" id="qbox${i}">
+    <span class="tag">${q.c}</span><p class="qtitle">${i+1}. ${q.q}</p>
+    ${q.o.map((opt,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}"><span><strong>${letters[j]}.</strong> ${opt}</span></label>`).join("")}
+    <div class="feedback hidden" id="fb${i}"></div>
+  </article>`).join("");
+  document.querySelectorAll('input[type="radio"]').forEach(el=>el.addEventListener("change",updateProgress));
+  updateProgress();
+}
+function updateProgress(){
+ const n=questions.reduce((sum,q,i)=>sum+(document.querySelector(`input[name="q${i}"]:checked`)?1:0),0);
+ $("progressText").textContent=`${n} of ${questions.length} answered`;
+ $("bar").style.width=(n/questions.length*100)+"%";
+}
+$("startBtn").addEventListener("click",()=>{
+ name=$("studentName").value.trim();
+ if(!name){$("studentName").focus();alert("Please enter your name first.");return;}
+ $("welcome").classList.add("hidden");$("exam").classList.remove("hidden");
+ $("greeting").textContent="Good luck, "+name+"!";renderQuestions();window.scrollTo(0,0);
+});
+$("submitBtn").addEventListener("click",()=>{
+ const unanswered=questions.reduce((sum,q,i)=>sum+(!document.querySelector(`input[name="q${i}"]:checked`)?1:0),0);
+ if(unanswered && !confirm(`You have ${unanswered} unanswered question(s). Submit anyway?`))return;
+ submitted=true;
+ const answers=questions.map((q,i)=>{const el=document.querySelector(`input[name="q${i}"]:checked`);return el?Number(el.value):-1;});
+ const total=answers.reduce((sum,a,i)=>sum+(a===questions[i].a?1:0),0);
+ $("exam").classList.add("hidden");$("results").classList.remove("hidden");
+ $("resultName").textContent="Candidate: "+name;
+ $("score").textContent=`${total} / ${questions.length} (${Math.round(total/questions.length*100)}%)`;
+ $("scoreMessage").textContent=total>=45?"Excellent work!":total>=35?"Good effort—review the explanations to improve further.":total>=25?"You have a foundation to build on. Focus on the subjects below.":"Keep practicing. Review each explanation and try again.";
+ const groups={};questions.forEach((q,i)=>{if(!groups[q.c])groups[q.c]={right:0,total:0};groups[q.c].total++;if(answers[i]===q.a)groups[q.c].right++;});
+ $("breakdown").innerHTML=Object.entries(groups).map(([c,v])=>`<div class="resultrow"><strong>${c}</strong><br>${v.right}/${v.total} correct (${Math.round(v.right/v.total*100)}%)</div>`).join("");
+ const weakest=Object.entries(groups).sort((a,b)=>a[1].right/a[1].total-b[1].right/b[1].total);
+ $("tips").innerHTML=weakest.map(([c,v],i)=>`<div class="resultrow"><strong>${i===0?"Priority 1":i===1?"Priority 2":"Practice"}: ${c}</strong><br>${v.right/v.total<.7?"Review core concepts, make short notes, and practice 5–10 questions daily in this subject.":"Maintain this subject with regular short revision sessions."}</div>`).join("");
+ $("review").innerHTML="";
+ $("reviewBtn").onclick=()=>{
+  $("review").innerHTML='<div class="card"><h2>Answer review & explanations</h2>'+questions.map((q,i)=>{
+   const a=answers[i],ok=a===q.a;
+   return `<div class="question"><span class="tag">${q.c}</span><p class="qtitle">${i+1}. ${q.q}</p><p class="${ok?"correct":"incorrect"}">${a<0?"Not answered":ok?"Correct":"Your answer: "+letters[a]+". "+q.o[a]}</p><p><strong>Correct answer:</strong> ${letters[q.a]}. ${q.o[q.a]}</p><p class="small"><strong>Explanation:</strong> ${q.e}</p></div>`;
+  }).join("")+'</div>';
+  $("review").scrollIntoView({behavior:"smooth"});
+ };
+ window.scrollTo(0,0);
+});
+$("retakeBtn").addEventListener("click",()=>{
+ name="";submitted=false;$("studentName").value="";$("questions").innerHTML="";$("breakdown").innerHTML="";$("tips").innerHTML="";$("review").innerHTML="";
+ $("results").classList.add("hidden");$("welcome").classList.remove("hidden");window.scrollTo(0,0);
+});
+</script>
+</body>
+</html>
